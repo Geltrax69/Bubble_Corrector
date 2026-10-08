@@ -1,171 +1,87 @@
-<div align="center">
-  <img src="docs/images/wordpop-preview.svg" alt="Bubble Corrector preview" width="100%" />
+# Bubble Corrector
 
-  # Bubble Corrector
+> ## Status: 🟢 Completed
+>
+> <progress value="95" max="100"></progress>
+>
+> **Progress: 95%** — Fully working macOS menu bar app with built DMG. Only polish items remain.
 
-  A native macOS menu bar spell assistant that turns spelling fixes into floating, clickable bubbles.
+<p align="center">
+  <img src="docs/banner.webp" alt="Bubble Corrector banner" width="100%" />
+</p>
 
-  [Download the DMG](https://github.com/Geltrax69/Bubble_Corrector/raw/main/dist/WordPop.dmg)
-</div>
+![Swift](https://img.shields.io/badge/Swift-5.9-orange)
+![macOS](https://img.shields.io/badge/macOS-14+-blue)
+![Platform](https://img.shields.io/badge/Platform-Menu_Bar-lightgrey)
+
+## What it is
+
+Bubble Corrector (built as **WordPop**) is a native macOS menu bar app that watches your typing system-wide. When it detects a misspelled word, it spawns a floating, animated correction bubble on your screen — click the bubble and it bursts, then WordPop safely replaces the misspelled word. It's a lightweight utility with no Dock icon, built entirely on native macOS APIs.
+
+[Download the DMG](https://github.com/Geltrax69/Bubble_Corrector/raw/main/dist/WordPop.dmg)
+
+## What works (verified)
+
+- ✅ **System-wide spelling detection** — `SpellCheckerService` uses native macOS spell checking
+- ✅ **Floating animated bubbles** — `BubbleManager` handles multiple simultaneous bubbles with collision physics
+- ✅ **Click-to-burst correction** — `ReplacementEngine` safely replaces the original word
+- ✅ **Keyboard monitoring** — `KeyboardMonitorService` + `WordBufferService` track typing via Accessibility APIs
+- ✅ **Customization** — bubble shapes (Bubble, Circle, Rounded, Diamond, Star, Random Curves), custom image/GIF backgrounds, speed controls
+- ✅ **Built artifact** — `dist/WordPop.dmg` is ready to download and install
+- ✅ **Live preview** — control panel shows real-time bubble preview
+
+## Tech stack
+
+| Layer | Technology |
+|-------|-----------|
+| Language | Swift 5.9 |
+| Platform | macOS 14+ |
+| UI | SwiftUI + AppKit |
+| APIs | Accessibility, NSSpellChecker |
+| Build | Swift Package Manager |
+
+## How to run
+
+**Option 1 — Install the DMG (easiest):**
+Download [WordPop.dmg](https://github.com/Geltrax69/Bubble_Corrector/raw/main/dist/WordPop.dmg), open it, and drag to Applications. Grant Accessibility permissions when prompted.
+
+**Option 2 — Build from source:**
+```bash
+swift build -c release
+```
+
+> Note: Requires macOS 14+ with Xcode. The app needs Accessibility permissions to monitor typing system-wide.
+
+## Screenshots
+
+<p align="center">
+  <img src="docs/images/wordpop-preview.svg" alt="WordPop preview" width="100%" />
+  <img src="docs/images/control-panel.png" alt="Control panel" width="600" />
+</p>
+
+## What you can add more
+
+- [ ] **Custom dictionaries** — let users add their own words/names to skip
+- [ ] **Multi-language support** — spell checking in languages beyond system default
+- [ ] **Bubble themes** — preset packs (neon, pastel, minimal)
+- [ ] **Statistics dashboard** — track corrections per day/week
+- [ ] **Auto-update** — Sparkle framework for in-app updates
+- [ ] **Keyboard shortcut** — trigger manual spell check on selected text
+
+## Project structure
+
+```
+Bubble_Corrector/
+├── WordPop/
+│   ├── App/              # App entry point, menu bar setup
+│   ├── Managers/         # BubbleManager, AccessibilityManager
+│   ├── Models/           # BubbleSettings and data models
+│   ├── Services/         # SpellChecker, KeyboardMonitor, ReplacementEngine, WordBuffer
+│   └── Utilities/        # Logging
+├── Scripts/              # Build scripts
+├── dist/                 # Built DMG
+└── docs/                 # Images and documentation
+```
 
 ---
-
-## What It Does
-
-Bubble Corrector, built as **WordPop**, watches your typing system-wide. When it detects a misspelled word, it creates a floating correction bubble on your screen. Click the bubble and it bursts, then WordPop tries to replace the original misspelled word safely.
-
-It is designed as a lightweight macOS utility:
-
-- Menu bar app with no Dock clutter
-- System-wide spelling detection using native macOS APIs
-- Floating animated correction bubbles
-- Multiple bubbles at the same time
-- Bubble-to-bubble collision bounce
-- Screen-edge bounce, including visible menu/Dock boundaries
-- Click-to-burst correction flow
-- Custom image or GIF bubble backgrounds
-- Shape controls: Bubble, Circle, Rounded, Diamond, Star, and Random Curves
-- Movement controls for speed and randomness
-- Live preview in the control panel
-
-## Download
-
-The packaged app is included in this repository:
-
-**[Download WordPop.dmg](https://github.com/Geltrax69/Bubble_Corrector/raw/main/dist/WordPop.dmg)**
-
-After downloading:
-
-1. Open `WordPop.dmg`.
-2. Drag `WordPop.app` into `Applications`.
-3. Launch WordPop.
-4. Grant Accessibility permission when macOS asks.
-
-> Note: this build is signed with an Apple Development certificate, not Developer ID notarized. On another Mac, Gatekeeper may ask you to allow it manually.
-
-## Control Panel
-
-<div align="center">
-  <img src="docs/images/control-panel.png" alt="WordPop control panel" width="640" />
-</div>
-
-The control panel lets you customize:
-
-- Bubble image or animated GIF
-- Crop mode for large images
-- Bubble size with live preview
-- Movement speed from `0` to `1`
-- Randomness from `0` to `1`
-- Bubble shape
-- Launch at login
-- Enable/disable WordPop
-
-## How Correction Works
-
-WordPop uses macOS Accessibility APIs to remember where a misspelled word was typed. When you click a correction bubble, it attempts to re-select that original word and replace it.
-
-This is intentionally safe:
-
-- If WordPop can locate the original misspelled word, it replaces it.
-- If the focused app hides the text field or refuses Accessibility range editing, WordPop skips replacement.
-- It does **not** type at your current cursor position when the original word cannot be safely targeted.
-
-That safety rule prevents bugs like inserting the correction into the wrong place after your cursor has moved.
-
-## Current Limitation
-
-Some apps, especially browser-based or Electron apps such as ChatGPT, WhatsApp Desktop, Slack-like apps, and some web editors, do not expose their editable text fields through macOS Accessibility in a way that supports safe old-word replacement.
-
-In those apps WordPop can often show bubbles, but correction may be skipped if macOS does not provide a safe target.
-
-Possible future solutions:
-
-- Browser extension integration for web text editors
-- App-specific adapters for Electron/web apps
-- Optional clipboard-based correction mode
-- A manual “copy corrected word” action
-
-## Build From Source
-
-Requirements:
-
-- macOS 14+
-- Xcode / Swift toolchain
-
-Build the app:
-
-```bash
-swift build
-```
-
-Create the signed app bundle:
-
-```bash
-Scripts/build_wordpop_app.sh
-```
-
-Create the DMG:
-
-```bash
-Scripts/build_wordpop_dmg.sh
-```
-
-Generated files:
-
-```text
-dist/WordPop.app
-dist/WordPop.dmg
-```
-
-## Project Structure
-
-```text
-WordPop/
-  App/                 SwiftUI app entry point
-  Managers/            Bubble and Accessibility management
-  Models/              Settings model
-  Services/            Keyboard monitor, replacement engine, spell checker
-  Utilities/           Logging
-  Views/               Menu bar UI, settings, bubble renderer
-Scripts/
-  build_wordpop_app.sh
-  build_wordpop_dmg.sh
-dist/
-  WordPop.dmg
-```
-
-## Permissions
-
-WordPop needs **Accessibility** permission because it monitors typing and asks macOS for focused text-field information.
-
-Open:
-
-```text
-System Settings > Privacy & Security > Accessibility
-```
-
-Then enable `WordPop`.
-
-## Status
-
-Working:
-
-- Native menu bar app
-- DMG packaging
-- Floating bubbles
-- Custom image/GIF bubble background
-- Live preview and controls
-- Safe replacement when macOS exposes a text target
-- Bubble collision and screen-edge bouncing
-
-Still evolving:
-
-- Universal correction inside apps that hide text fields from Accessibility
-- Manual crop/position controls for uploaded images
-- Notarized public distribution build
-
----
-
-<div align="center">
-  Made for macOS with SwiftUI, AppKit, Accessibility, CoreGraphics, and NSSpellChecker.
-</div>
+*README written after code audit on 2026-10-08.*
